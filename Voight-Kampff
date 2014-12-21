@@ -13,7 +13,7 @@ class Voightkampff:
             if self.debug: print(str(self.i) + " ", end="")
             current = self.input_file[self.i].split()
             if current:
-                #todo parse E1 value from file (if want to do the wiggles)
+                #todo parse E1 value from file (if want to do the wiggles)...
                 if current[0][:7] == "$VEL.CP" and self.in_velocity is None:
                     if self.debug: print("Getting exiting baseline velocity")
                     self.in_velocity = current[0][7:]
@@ -25,7 +25,8 @@ class Voightkampff:
                     self.output_file.write(self.input_file[self.i])
                     self.i += 1
                 elif current[0] == "LIN":
-                    #todo way to skip lead-in and lead-out?
+                    #todo skip lead-in and lead-out???
+                    #todo better way to handle the order in which infections occur???
                     a, b = self.jitters.infect(self.output_file, self.input_file[self.i], self.in_acceleration,
                                                self.in_velocity)
                     if a:
