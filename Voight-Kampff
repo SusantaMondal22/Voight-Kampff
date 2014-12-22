@@ -176,5 +176,6 @@ if __name__ == "__main__":
 
     if file_dir:
         my_test = Voightkampff(file_dir)
-        my_test.debug = True
+        #my_test.debug = True
         my_test.test()
+        print("Infection complete")
