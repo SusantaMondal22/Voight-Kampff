@@ -1,9 +1,7 @@
-
 import random
 
 
 class Voightkampff:
-
     def test(self):
         self.output_file.write('DEF ' + self.output_dir.split("\\")[-1].split(".")[0] + '() \n')
         #todo write warning as a KSS message (see 'KSS_82_messages_en.pdf') instead of a line in the file...
@@ -14,21 +12,21 @@ class Voightkampff:
             current = self.input_file[self.i].split()
             if current:
                 #todo parse E1 value from file (if want to do the wiggles)...
-                if current[0][:7] == "$VEL.CP" and self.in_velocity is None:
+                if current[0][:7] == "$VEL.CP" and self.default_velocity is None:
                     if self.debug: print("Getting exiting baseline velocity")
-                    self.in_velocity = current[0][7:]
+                    self.default_velocity = current[0][7:]
                     self.output_file.write(self.input_file[self.i])
                     self.i += 1
-                elif current[0][:7] == "$ACC.CP" and self.in_acceleration is None:
+                elif current[0][:7] == "$ACC.CP" and self.default_acceleration is None:
                     if self.debug: print("Getting existing baseline acceleration")
-                    self.in_acceleration = current[0][7:]
+                    self.default_acceleration = current[0][7:]
                     self.output_file.write(self.input_file[self.i])
                     self.i += 1
                 elif current[0] == "LIN":
                     #todo skip lead-in and lead-out???
                     #todo better way to handle the order in which infections occur???
-                    a, b = self.jitters.infect(self.output_file, self.input_file[self.i], self.in_acceleration,
-                                               self.in_velocity)
+                    a, b = self.jitters.infect(self.output_file, self.input_file[self.i], self.default_acceleration,
+                                               self.default_velocity)
                     if a:
                         if self.debug: print("Jitters")
                         self.i += b
@@ -74,13 +72,12 @@ class Voightkampff:
 
         #initialize other things
         self.i = 1
-        self.in_velocity = None
-        self.in_acceleration = None
+        self.default_velocity = None
+        self.default_acceleration = None
         self.debug = False
 
 
 class Infection:
-
     def __init__(self, percentage):
         self.percentage = percentage if percentage is not None else 0.1
 
@@ -88,11 +85,10 @@ class Infection:
         return random.random() < self.percentage
 
 
-class Jitter (Infection):
-
+class Jitter(Infection):
     def __init__(self, percentage=None, velocity=None, acceleration=None, distance=None, wait=None,
                  skip=None):
-        super(Jitter,self).__init__(percentage)
+        super(Jitter, self).__init__(percentage)
         self.velocity = velocity if velocity is not None else 0.25
         self.acceleration = acceleration if acceleration is not None else 1
         self.distance = distance if distance is not None else 100
@@ -102,32 +98,31 @@ class Jitter (Infection):
     def infect(self, out_file, in_line, in_accel, in_velo):
         if self._check():
             out_file.write(';*****INFECTED WITH THE JITTERS!*****\n')
-            out_file.write('EXTRUDE = FALSE\n')                                             # turn off extruder
-            out_file.write('$IPO_MODE = #TCP\n')                                            # set to tool coordinates
-            out_file.write(''.join(['$VEL.CP = ', str(self.velocity),'\n']))                # set new velocity
-            out_file.write(''.join(['$ACC.CP = ', str(self.acceleration),'\n']))            # set new acceleration
-            out_file.write(''.join(['LIN_REL { Z ', str(self.distance/5), ' } C_DIS\n']))
-            out_file.write(''.join(['$ACC.CP = ', str(in_accel),'\n']))                     # reset default acceleration
+            out_file.write('EXTRUDE = FALSE\n')  # turn off extruder
+            out_file.write('$IPO_MODE = #TCP\n')  # set to tool coordinates
+            out_file.write(''.join(['$VEL.CP = ', str(self.velocity), '\n']))  # set new velocity
+            out_file.write(''.join(['$ACC.CP = ', str(self.acceleration), '\n']))  # set new acceleration
+            out_file.write(''.join(['LIN_REL { Z ', str(self.distance / 5), ' } C_DIS\n']))
+            out_file.write(''.join(['$ACC.CP = ', str(in_accel), '\n']))  # reset default acceleration
             out_file.write(''.join(['LIN_REL { Z ', str(self.distance), ' } C_DIS\n']))
-            out_file.write(''.join(['LIN_REL { Z -', str(self.distance/3), ' } C_DIS\n']))
-            out_file.write(''.join(['LIN_REL { Z ', str(self.distance/3), ' } C_DIS\n']))
-            out_file.write(''.join(['LIN_REL { Z -', str(self.distance/5), ' } C_DIS\n']))
-            out_file.write(''.join(['LIN_REL { Z ', str(self.distance/5), ' }\n']))
+            out_file.write(''.join(['LIN_REL { Z -', str(self.distance / 3), ' } C_DIS\n']))
+            out_file.write(''.join(['LIN_REL { Z ', str(self.distance / 3), ' } C_DIS\n']))
+            out_file.write(''.join(['LIN_REL { Z -', str(self.distance / 5), ' } C_DIS\n']))
+            out_file.write(''.join(['LIN_REL { Z ', str(self.distance / 5), ' }\n']))
             out_file.write(''.join(['WAIT SEC ', str(self.wait), '\n']))
-            out_file.write('$IPO_MODE = #BASE\n')                                           # reset to base coordinates
-            out_file.write(''.join(['$VEL.CP = ', str(in_velo),'\n']))                      # reset default velocity
-            out_file.write(in_line)                                                         # continue to proper position
-            out_file.write('EXTRUDE = TRUE\n')                                              # turn on extruder
+            out_file.write('$IPO_MODE = #BASE\n')  # reset to base coordinates
+            out_file.write(''.join(['$VEL.CP = ', str(in_velo), '\n']))  # reset default velocity
+            out_file.write(in_line)  # continue to proper position
+            out_file.write('EXTRUDE = TRUE\n')  # turn on extruder
             out_file.write(';****CURED OF THE JITTERS!***\n')
             return True, self.skip
         else:
             return False, None
 
 
-class Amnesia (Infection):
-
+class Amnesia(Infection):
     def __init__(self, percentage=None, skip=None):
-        super(Amnesia,self).__init__(percentage)
+        super(Amnesia, self).__init__(percentage)
         self.skip = skip if skip is not None else 4
 
     def infect(self, out_file):
@@ -138,10 +133,9 @@ class Amnesia (Infection):
             return False, None
 
 
-class Decay (Infection):
-
+class Decay(Infection):
     def __init__(self, percentage=None, delay=None):
-        super(Decay,self).__init__(percentage)
+        super(Decay, self).__init__(percentage)
         self.delay = delay if delay is not None else 2
 
     def infect(self, out_file, in_line):
