@@ -1,0 +1,14 @@
+from tkinter import *
+
+root = Tk()
+
+v1 = LabelFrame(root, text="Jitter", padx=5, pady=5)
+v1.pack(padx=10, pady=10)
+
+v2 = LabelFrame(root, text="Amnesia", padx=5, pady=5)
+v2.pack(padx=10, pady=10)
+
+v3 = LabelFrame(root, text="Decay", padx=5, pady=5)
+v3.pack(padx=10, pady=10)
+
+mainloop()
