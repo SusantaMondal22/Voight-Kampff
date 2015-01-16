@@ -1,49 +1,56 @@
 import tkinter as tk
 from tkinter import messagebox, filedialog
 
+
+class vkGUI:
+
+    def __init__(self, master):
+
+        master.title('Voight-Kampff')
+
+        ### File selection ###
+        b1 = tk.Button(master, text='Select file', command=self.open)
+        b1.pack( padx=10, pady=5)
+
+        ### Jitter input ###
+        v1 = tk.LabelFrame(master, text='Jitter', padx=10, pady=10)
+        v1.pack(fill='x', padx=10, pady=5)
+
+        test1 = tk.Label(v1, text='Jitter variables will go here...')
+        test1.pack()
+
+        ### Amnesia input ###
+        v2 = tk.LabelFrame(master, text='Amnesia', padx=10, pady=10)
+        v2.pack(fill='x', padx=10, pady=5)
+
+        test2 = tk.Label(v2, text='Amnesia variables will go here...')
+        test2.pack()
+
+        ### Decay input ###
+        v3 = tk.LabelFrame(master, text='Decay', padx=10, pady=10)
+        v3.pack(fill='x', padx=10, pady=5)
+
+        test3 = tk.Label(v3, text='Decay variables will go here...')
+        test3.pack()
+
+        ### Buttons at the bottom ###
+        b2 = tk.Button(master, text='About', command=self.info)
+        b2.pack(side='right', padx=10, pady=5)
+
+    ### Command definitions ###
+    def open(self):
+        options = {}
+        options['title'] = 'Select file to open'
+        options['defaultextension'] = '.src'
+        options['filetypes'] = [('KRL files', '.src')]
+        options['initialdir'] = 'C:\\'
+        return filedialog.askopenfilename(**options)
+
+    def info(self):
+        return messagebox.showinfo("Voight-Kampff v1.0", "Developed by Aaron Willette of Khôra LLC\n\nDistributed under a "
+                                                  "Creative Commons License")
+
+
 root = tk.Tk()
-root.title('Voight-Kampff')
-
-### Get that file! ###
-def open():
-    options = {}
-    options['title'] = 'Select file to open'
-    options['defaultextension'] = '.src'
-    options['filetypes'] = [('KRL files', '.src')]
-    options['initialdir'] = 'C:\\'
-    return filedialog.askopenfilename(**options)
-
-b1 = tk.Button(root, text='Select file', command=open)
-b1.pack( padx=10, pady=5)
-
-### Jitter input ###
-v1 = tk.LabelFrame(root, text='Jitter', padx=10, pady=10)
-v1.pack(fill='x', padx=10, pady=5)
-
-test1 = tk.Label(v1, text='Jitter variables will go here...')
-test1.pack()
-
-### Amnesia input ###
-v2 = tk.LabelFrame(root, text='Amnesia', padx=10, pady=10)
-v2.pack(fill='x', padx=10, pady=5)
-
-test2 = tk.Label(v2, text='Amnesia variables will go here...')
-test2.pack()
-
-### Decay input ###
-v3 = tk.LabelFrame(root, text='Decay', padx=10, pady=10)
-v3.pack(fill='x', padx=10, pady=5)
-
-test3 = tk.Label(v3, text='Decay variables will go here...')
-test3.pack()
-
-
-### Stuff at the bottom ###
-def info():
-    return messagebox.showinfo("Voight-Kampff v1.0", "Developed by Aaron Willette of Khôra LLC\n\nDistributed under a "
-                                              "Creative Commons License")
-
-b2 = tk.Button(root, text='About', command=info)
-b2.pack(side='right', padx=10, pady=5)
-
+main_gui = vkGUI(root)
 root.mainloop()
