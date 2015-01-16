@@ -1,14 +1,49 @@
-from tkinter import *
+import tkinter as tk
+from tkinter import messagebox, filedialog
 
-root = Tk()
+root = tk.Tk()
+root.title('Voight-Kampff')
 
-v1 = LabelFrame(root, text="Jitter", padx=5, pady=5)
-v1.pack(padx=10, pady=10)
+### Get that file! ###
+def open():
+    options = {}
+    options['title'] = 'Select file to open'
+    options['defaultextension'] = '.src'
+    options['filetypes'] = [('KRL files', '.src')]
+    options['initialdir'] = 'C:\\'
+    return filedialog.askopenfilename(**options)
 
-v2 = LabelFrame(root, text="Amnesia", padx=5, pady=5)
-v2.pack(padx=10, pady=10)
+b1 = tk.Button(root, text='Select file', command=open)
+b1.pack( padx=10, pady=5)
 
-v3 = LabelFrame(root, text="Decay", padx=5, pady=5)
-v3.pack(padx=10, pady=10)
+### Jitter input ###
+v1 = tk.LabelFrame(root, text='Jitter', padx=10, pady=10)
+v1.pack(fill='x', padx=10, pady=5)
 
-mainloop()
+test1 = tk.Label(v1, text='Jitter variables will go here...')
+test1.pack()
+
+### Amnesia input ###
+v2 = tk.LabelFrame(root, text='Amnesia', padx=10, pady=10)
+v2.pack(fill='x', padx=10, pady=5)
+
+test2 = tk.Label(v2, text='Amnesia variables will go here...')
+test2.pack()
+
+### Decay input ###
+v3 = tk.LabelFrame(root, text='Decay', padx=10, pady=10)
+v3.pack(fill='x', padx=10, pady=5)
+
+test3 = tk.Label(v3, text='Decay variables will go here...')
+test3.pack()
+
+
+### Stuff at the bottom ###
+def info():
+    return messagebox.showinfo("Voight-Kampff v1.0", "Developed by Aaron Willette of Khôra LLC\n\nDistributed under a "
+                                              "Creative Commons License")
+
+b2 = tk.Button(root, text='About', command=info)
+b2.pack(side='right', padx=10, pady=5)
+
+root.mainloop()
