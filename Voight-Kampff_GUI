@@ -5,19 +5,38 @@ from tkinter import messagebox, filedialog
 class vkGUI:
     def __init__(self, master):
         master.title('Voight-Kampff')
+        self.main_frame = tk.Frame(master,
+                                   width=100,
+                                   height=100)
+        #todo get key binding to work properly!
+        self.main_frame.bind("<Key>", self.handler)
+        self.main_frame.grid()
+
+        self.create_widgets(self.main_frame)
+
+    def create_widgets(self, main):
 
         ### File selection ###
-        self.b1 = tk.Button(master,
+        self.b1 = tk.Button(main,
                             text='Select file',
+                            underline=0,
                             command=self.open)
-        self.b1.pack(padx=10, pady=5)
+        self.b1.grid(row=0, padx=10, pady=15, sticky='W')
+
+        self.e1 = tk.Entry(main,
+                           width=37,
+                           state="readonly")
+        self.e1.grid(row=0, column=1, padx=10)
+
 
         ### JITTER INPUT ###
-        self.v1 = tk.LabelFrame(master,
+        self.v1 = tk.LabelFrame(main,
                                 text='Jitter',
                                 padx=10,
                                 pady=10)
-        self.v1.pack(fill='x', padx=10, pady=5)
+        self.v1.columnconfigure(0, minsize=100)
+        self.v1.grid(row=1, padx=10, pady=5, columnspan=2)
+
 
         ## jitter percent ##
         self.jitter_percent_label = tk.Label(self.v1)
@@ -105,8 +124,10 @@ class vkGUI:
 
 
         ### Amnesia input ###
-        self.v2 = tk.LabelFrame(master, text='Amnesia', padx=10, pady=10)
-        self.v2.pack(fill='x', padx=10, pady=5)
+        self.v2 = tk.LabelFrame(main, text='Amnesia', padx=10, pady=10)
+        self.v2.grid_columnconfigure(0, minsize=100)
+        self.v2.grid(row=2, padx=10, pady=5, columnspan=2)
+
 
         ## amnesia percent ##
         self.amnesia_percent_label = tk.Label(self.v2)
@@ -137,8 +158,9 @@ class vkGUI:
         self.amnesia_skip_slider.grid(row=1, column=1, sticky='W')
 
         ### Decay input ###
-        self.v3 = tk.LabelFrame(master, text='Decay', padx=10, pady=10)
-        self.v3.pack(fill='x', padx=10, pady=5)
+        self.v3 = tk.LabelFrame(main, text='Decay', padx=10, pady=10)
+        self.v3.columnconfigure(0, minsize=100)
+        self.v3.grid(row=3, padx=10, pady=5, columnspan=2)
 
         ## decay percent ##
         self.decay_percent_label = tk.Label(self.v3)
@@ -169,17 +191,35 @@ class vkGUI:
         self.decay_wait_slider.grid(row=1, column=1, sticky='W')
 
         ### Buttons at the bottom ###
-        self.b2 = tk.Button(master, text='About', command=self.info)
-        self.b2.pack(side='right', padx=10, pady=5)
+        self.b2 = tk.Button(main,
+                            text='Run VK test',
+                            underline=0,)
+        self.b2.grid(row=4, padx=10, pady=5)
+
+        self.b3 = tk.Button(main,
+                            text='About',
+                            underline=0,
+                            command=self.info)
+        self.b3.grid(row=4, column=1, padx=10, pady=5)
 
     ### Command definitions ###
+
+    def handler(self, event):
+        print("keypress")
+        if event.char == 'a':
+            self.info()
+
     def open(self):
         options = {'title': 'Select file to open',
                    'defaultextension': '.src',
                    'filetypes': [('KRL files', '.src')],
                    'initialdir': 'C:\\'}
+        update_text = filedialog.askopenfilename(**options)
 
-        return filedialog.askopenfilename(**options)
+        self.e1.configure(state='normal')
+        self.e1.delete(0, -1)
+        self.e1.insert(0, update_text)
+        self.e1.configure(state='readonly')
 
     def info(self):
         return messagebox.showinfo("Voight-Kampff v1.0",
