@@ -3,13 +3,15 @@ from tkinter import messagebox, filedialog
 
 
 class vkGUI:
+
     def __init__(self, master):
         master.title('Voight-Kampff')
+        master.resizable(width=False, height=False)
         self.main_frame = tk.Frame(master,
                                    width=100,
                                    height=100)
         #todo get key binding to work properly!
-        self.main_frame.bind("<Key>", self.handler)
+        self.main_frame.bind("<Key>", self.key_handler)
         self.main_frame.grid()
 
         self.create_widgets(self.main_frame)
@@ -21,12 +23,13 @@ class vkGUI:
                             text='Select file',
                             underline=0,
                             command=self.open)
-        self.b1.grid(row=0, padx=10, pady=15, sticky='W')
+        self.b1.grid(row=0, padx=10, pady=15, sticky='WE')
 
         self.e1 = tk.Entry(main,
-                           width=37,
-                           state="readonly")
-        self.e1.grid(row=0, column=1, padx=10)
+                           width=37)
+        self.e1.insert(0, "No file selected...")
+        self.e1.configure(state='readonly')
+        self.e1.grid(row=0, column=1, padx=10, columnspan=4, sticky='WE')
 
 
         ### JITTER INPUT ###
@@ -35,10 +38,11 @@ class vkGUI:
                                 padx=10,
                                 pady=10)
         self.v1.columnconfigure(0, minsize=100)
-        self.v1.grid(row=1, padx=10, pady=5, columnspan=2)
+        self.v1.grid(row=1, padx=10, pady=5, columnspan=4)
 
 
         ## jitter percent ##
+        #todo set up the label/slider pair as a Class object that contains an update function
         self.jitter_percent_label = tk.Label(self.v1)
         self.jitter_percent_label.grid(row=0, sticky='E')
 
@@ -126,7 +130,7 @@ class vkGUI:
         ### Amnesia input ###
         self.v2 = tk.LabelFrame(main, text='Amnesia', padx=10, pady=10)
         self.v2.grid_columnconfigure(0, minsize=100)
-        self.v2.grid(row=2, padx=10, pady=5, columnspan=2)
+        self.v2.grid(row=2, padx=10, pady=5, columnspan=4)
 
 
         ## amnesia percent ##
@@ -160,7 +164,7 @@ class vkGUI:
         ### Decay input ###
         self.v3 = tk.LabelFrame(main, text='Decay', padx=10, pady=10)
         self.v3.columnconfigure(0, minsize=100)
-        self.v3.grid(row=3, padx=10, pady=5, columnspan=2)
+        self.v3.grid(row=3, padx=10, pady=5, columnspan=4)
 
         ## decay percent ##
         self.decay_percent_label = tk.Label(self.v3)
@@ -192,19 +196,31 @@ class vkGUI:
 
         ### Buttons at the bottom ###
         self.b2 = tk.Button(main,
-                            text='Run VK test',
+                            text='Run VK',
                             underline=0,)
-        self.b2.grid(row=4, padx=10, pady=5)
+        self.b2.grid(row=4, padx=10, pady=5, sticky='WE')
 
         self.b3 = tk.Button(main,
+                            text='Export Settings',
+                            command=self.save,
+                            underline=0)
+        self.b3.grid(row=4, column=1, padx=2, pady=5, sticky='E')
+
+        self.b4 = tk.Button(main,
+                            text='Import Settings',
+                            command=self.imports,
+                            underline=0)
+        self.b4.grid(row=4, column=2, padx=2, pady=5, sticky='E')
+
+        self.b5 = tk.Button(main,
                             text='About',
-                            underline=0,
-                            command=self.info)
-        self.b3.grid(row=4, column=1, padx=10, pady=5)
+                            command=self.info,
+                            underline=0)
+        self.b5.grid(row=4, column=3, padx=10, pady=5, sticky='E')
 
     ### Command definitions ###
 
-    def handler(self, event):
+    def key_handler(self, event):
         print("keypress")
         if event.char == 'a':
             self.info()
@@ -216,15 +232,47 @@ class vkGUI:
                    'initialdir': 'C:\\'}
         update_text = filedialog.askopenfilename(**options)
 
-        self.e1.configure(state='normal')
-        self.e1.delete(0, -1)
-        self.e1.insert(0, update_text)
-        self.e1.configure(state='readonly')
+        if update_text:
+            self.e1.configure(state='normal')
+            self.e1.delete(0, tk.END)
+            self.e1.insert(0, update_text)
+            self.e1.configure(state='readonly')
+
+    def save(self):
+        #todo implement saving settings to .vkdat
+        options = {'title': 'Export settings as',
+                   'defaultextension': '.vkdat',
+                   'filetypes': [('VK data files', '.vkdat')],
+                   'initialdir': 'C:\\'}
+        file_name = filedialog.asksaveasfilename(**options)
+
+        if file_name:
+            print("This function not currently working... but you selected " + file_name)
+        else:
+            print("No filename to save to")
+
+
+    def imports(self):
+        #todo implement importing settings from .vkdat
+        options = {'title': 'Select settings file to import',
+                   'defaultextension': '.vkdat',
+                   'filetypes': [('VK data files', '.vkdat')],
+                   'initialdir': 'C:\\'}
+        file_dir = filedialog.askopenfilename(**options)
+
+        if file_dir:
+            print("This function not currently working... but you selected " + file_dir)
+        else:
+            print("No file selected")
+
 
     def info(self):
         return messagebox.showinfo("Voight-Kampff v1.0",
-                                   "Developed by Aaron Willette of Khôra LLC\n\nDistributed under a "
-                                   "Creative Commons License")
+                                   "Developed by Aaron M "
+                                   "Willette\ngithub.com/pixelwhore/Voight-Kampff\ncontact@pixelwhore.com"
+                                   "\n\nLicensed under the GNU General Public License (GPL) version 3.\nThis means you "
+                                   "are free to use it and modify it, but if you distribute your modifications you "
+                                   "must distribute the source of your modifications as well.")
 
     def update_jp_label(self, new_value):
         update_text = "Percent: " + "{0:.2f}".format(float(new_value))
@@ -266,7 +314,7 @@ class vkGUI:
         update_text = "Wait: " + "{0:.2f}".format(float(new_value))
         self.decay_wait_label.configure(text=update_text)
 
-
-root = tk.Tk()
-main_gui = vkGUI(root)
-root.mainloop()
+if __name__ == "__main__":
+    root = tk.Tk()
+    main_gui = vkGUI(root)
+    root.mainloop()
