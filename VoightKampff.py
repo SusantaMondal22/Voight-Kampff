@@ -25,6 +25,7 @@ class Infection:
                 elif current[0] == "LIN":
                     #todo skip lead-in and lead-out???
                     #todo better way to handle the order in which viruses are called???
+                    #todo make sure that aren't skipping important commands at end of file
                     a, b = self.jitters.infect(self.output_file, self.input_file[self.i], self.default_acceleration,
                                                self.default_velocity)
                     if a:
@@ -86,6 +87,7 @@ class Virus:
 
 
 class Jitter(Virus):
+    #todo make sure that skip values don't kick it past
     def __init__(self, percentage=None, velocity=None, acceleration=None, distance=None, wait=None,
                  skip=None):
         super(Jitter, self).__init__(percentage)
