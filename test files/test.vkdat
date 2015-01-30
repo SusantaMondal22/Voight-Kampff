@@ -1,0 +1,13 @@
+Voight-Kampff, v1.0
+
+D:/Temp/VK_test/test_AMW_02.src
+amnesia, percent, 0.8
+amnesia, skip, 50.0
+decay, percent, 0.8
+decay, wait, 3.0
+jitter, acceleration, 2.14
+jitter, distance, 37.1
+jitter, percent, 0.8
+jitter, skip, 20.0
+jitter, velocity, 0.41
+jitter, wait, 22.0

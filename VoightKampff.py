@@ -2,7 +2,7 @@ import random
 
 
 class Infection:
-    def test(self):
+    def modify_src(self):
         self.output_file.write('DEF ' + self.output_dir.split("\\")[-1].split(".")[0] + '() \n')
         #todo write warning as a KSS message (see 'KSS_82_messages_en.pdf') instead of a line in the file...
         self.output_file.write('This file has been infected... run at your own risk!!\n')
@@ -14,37 +14,58 @@ class Infection:
                 #todo parse E1 value from file (if want to do the wiggles)...
                 if current[0][:7] == "$VEL.CP" and self.default_velocity is None:
                     if self.debug: print("Getting exiting baseline velocity")
-                    self.default_velocity = current[0][7:]
+                    self.default_velocity = current[0][8:]
                     self.output_file.write(self.input_file[self.i])
                     self.i += 1
                 elif current[0][:7] == "$ACC.CP" and self.default_acceleration is None:
                     if self.debug: print("Getting existing baseline acceleration")
-                    self.default_acceleration = current[0][7:]
+                    self.default_acceleration = current[0][8:]
+                    self.output_file.write(self.input_file[self.i])
+                    self.i += 1
+                elif current[0][1:] == "PATH":
+                    if self.debug: print("Checking if in path - TRUE")
+                    self.path = True
+                    self.output_file.write(self.input_file[self.i])
+                    self.i += 1
+                elif current[0][1:5] == "LEAD":
+                    if self.debug: print("Checking if in path - FALSE")
+                    self.path = False
                     self.output_file.write(self.input_file[self.i])
                     self.i += 1
                 elif current[0] == "LIN":
-                    #todo skip lead-in and lead-out???
                     #todo better way to handle the order in which viruses are called???
-                    #todo make sure that aren't skipping important commands at end of file
-                    a, b = self.jitters.infect(self.output_file, self.input_file[self.i], self.default_acceleration,
-                                               self.default_velocity)
-                    if a:
-                        if self.debug: print("Jitters")
-                        self.i += b
-                    elif not a:
-                        c, d = self.amnesia.infect(self.output_file)
-                        if c:
-                            if self.debug: print("Amnesia")
-                            self.i += d
-                        elif not c:
-                            e, f = self.decay.infect(self.output_file, self.input_file[self.i])
-                            if e:
-                                if self.debug: print("Decay")
-                                self.i += f
-                            else:
-                                if self.debug: print("No infection")
-                                self.output_file.write(self.input_file[self.i])
-                                self.i += 1
+                    if self.path:
+                        try:
+                            max_skip = self.input_file[self.i:].index(";LEAD-OUT\n") - 2
+                        except:
+                            max_skip = 0
+
+                        a, b = self.jitters.infect(self.output_file, self.input_file[self.i], self.default_acceleration,
+                                                   self.default_velocity)
+                        if a:
+                            if self.debug: print("Jitters")
+                            if b > max_skip > 0: b = max_skip
+                            self.i += b
+                        elif not a:
+                            c, d = self.amnesia.infect(self.output_file)
+                            if c:
+                                if self.debug: print("Amnesia")
+                                if d > max_skip > 0: d = max_skip
+                                self.i += d
+                            elif not c:
+                                e, f = self.decay.infect(self.output_file, self.input_file[self.i])
+                                if e:
+                                    if self.debug: print("Decay")
+                                    if f > max_skip > 0: f = max_skip
+                                    self.i += f
+                                else:
+                                    if self.debug: print("No infection")
+                                    self.output_file.write(self.input_file[self.i])
+                                    self.i += 1
+                    else:
+                        if self.debug: print("No infections on lead-in/lead-out")
+                        self.output_file.write(self.input_file[self.i])
+                        self.i += 1
                 else:
                     if self.debug: print("No criteria met")
                     self.output_file.write(self.input_file[self.i])
@@ -75,6 +96,7 @@ class Infection:
         self.i = 1
         self.default_velocity = None
         self.default_acceleration = None
+        self.path = False
         self.debug = False
 
 
@@ -173,5 +195,5 @@ if __name__ == "__main__":
     if file_dir:
         my_test = Infection(file_dir)
         #my_test.debug = True
-        my_test.test()
+        my_test.modify_src()
         print("Infection complete")

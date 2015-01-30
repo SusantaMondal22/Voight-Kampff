@@ -12,9 +12,7 @@ class VKGui:
         self.main_frame = tk.Frame(master,
                                    width=100,
                                    height=100)
-        #todo get key binding to work properly!
-        self.main_frame.bind("<Key>", self.key_handler)
-        self.main_frame.grid()
+        self.main_frame.pack()
 
         self.controls = {}
         self.create_widgets(self.main_frame)
@@ -26,6 +24,8 @@ class VKGui:
                             text='Select file',
                             underline=0,
                             command=self.open)
+        #todo get key binding to work properly!
+        self.b1.bind('s', self.key_handler)
         self.b1.grid(row=0, padx=10, pady=15, sticky='WE')
 
         self.e1 = tk.Entry(main)
@@ -116,8 +116,6 @@ class VKGui:
     def key_handler(self, event):
         #todo get keypress event handler working properly
         print("keypress")
-        if event.char == 'a':
-            self.info()
 
     def open(self):
         options = {'title': 'Select file to open',
@@ -196,7 +194,8 @@ class VKGui:
             my_infection.jitters.wait = int(self.controls[('jitter', 'wait')].slider.get())
             my_infection.jitters.skip = int(self.controls[('jitter', 'skip')].slider.get())
 
-            my_infection.test()
+            #my_infection.debug = True
+            my_infection.modify_src()
 
             messagebox.showwarning("Infection complete!",
                                    "The SRC file has been modified, run at your own risk!")
