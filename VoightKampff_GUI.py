@@ -3,51 +3,52 @@ import tkinter as tk
 from tkinter import messagebox, filedialog
 
 
-class VKGui:
+class VKGui(tk.Frame):
     version = 1.0
 
-    def __init__(self, master):
-        master.title('Voight-Kampff')
-        master.resizable(width=False, height=False)
-        self.main_frame = tk.Frame(master,
-                                   width=100,
-                                   height=100)
-        self.main_frame.pack()
+    def __init__(self):
+        self.root = tk.Tk()
+        self.root.title('Voight-Kampff')
+        self.root.resizable(width=False, height=False)
+        self.root.bind("<Key>", self.key_handler)
+
+        tk.Frame.__init__(self,
+                          width=100,
+                          height=100)
+        self.grid()
 
         self.controls = {}
-        self.create_widgets(self.main_frame)
+        self.create_widgets()
 
-    def create_widgets(self, main):
+    def create_widgets(self):
 
-        ### FILE SELECTION ###
-        self.b1 = tk.Button(main,
+        # FILE SELECTION
+        self.b1 = tk.Button(self,
                             text='Select file',
                             underline=0,
-                            command=self.open)
-        #todo get key binding to work properly!
-        self.b1.bind('s', self.key_handler)
+                            command=self.select_file)
         self.b1.grid(row=0, padx=10, pady=15, sticky='WE')
 
-        self.e1 = tk.Entry(main)
+        self.e1 = tk.Entry(self)
         self.e1.insert(0, "No file selected...")
         self.e1.configure(state='readonly')
         self.e1.grid(row=0, column=1, padx=10, columnspan=3, sticky='WE')
 
 
-        ### LABELFRAMES ###
-        self.v2 = tk.LabelFrame(main, text='Amnesia', padx=10, pady=10)
+        # LABELFRAMES
+        self.v2 = tk.LabelFrame(self, text='Amnesia', padx=10, pady=10)
         self.v2.grid_columnconfigure(0, minsize=100)
         self.v2.grid(row=1, padx=10, pady=5, columnspan=4)
 
-        self.v3 = tk.LabelFrame(main, text='Decay', padx=10, pady=10)
+        self.v3 = tk.LabelFrame(self, text='Decay', padx=10, pady=10)
         self.v3.columnconfigure(0, minsize=100)
         self.v3.grid(row=2, padx=10, pady=5, columnspan=4)
 
-        self.v1 = tk.LabelFrame(main, text='Jitter', padx=10, pady=10)
+        self.v1 = tk.LabelFrame(self, text='Jitter', padx=10, pady=10)
         self.v1.columnconfigure(0, minsize=100)
         self.v1.grid(row=3, padx=10, pady=5, columnspan=4)
 
-        ## CONTROLS ##
+        # CONTROLS
         self.controls[('jitter', 'percent')] = VKControl(self.v1, "Percent")
         self.controls[('jitter', 'percent')].slider.config(to=1)
         self.controls[('jitter', 'percent')].grid(0)
@@ -88,36 +89,44 @@ class VKGui:
         self.controls[('decay', 'wait')].slider.config(from_=1, to=10, resolution=1)
         self.controls[('decay', 'wait')].grid(1)
 
-        ### OTHER FUNCTIONS ###
-        self.b2 = tk.Button(main,
+        # OTHER BUTTONS
+        self.b2 = tk.Button(self,
                             text='Run VK',
                             command=self.execute,
                             underline=0,)
         self.b2.grid(row=4, padx=10, pady=5, sticky='WE')
 
-        self.b3 = tk.Button(main,
+        self.b3 = tk.Button(self,
                             text='Export Settings',
-                            command=self.save,
+                            command=self.export_settings,
                             underline=0)
         self.b3.grid(row=4, column=1, padx=2, pady=5, sticky='E')
 
-        self.b4 = tk.Button(main,
+        self.b4 = tk.Button(self,
                             text='Import Settings',
-                            command=self.imports,
+                            command=self.import_settings,
                             underline=0)
         self.b4.grid(row=4, column=2, padx=2, pady=5, sticky='E')
 
-        self.b5 = tk.Button(main,
+        self.b5 = tk.Button(self,
                             text='About',
-                            command=self.info,
+                            command=self.show_info,
                             underline=0)
         self.b5.grid(row=4, column=3, padx=10, pady=5, sticky='E')
 
     def key_handler(self, event):
-        #todo get keypress event handler working properly
-        print("keypress")
+        if event.char.lower() == 's':
+            self.select_file()
+        elif event.char.lower() == 'r':
+            self.execute()
+        elif event.char.lower() == 'e':
+            self.export_settings()
+        elif event.char.lower() == 'i':
+            self.import_settings()
+        elif event.char.lower() == 'a':
+            self.show_info()
 
-    def open(self):
+    def select_file(self):
         options = {'title': 'Select file to open',
                    'defaultextension': '.src',
                    'filetypes': [('KRL files', '.src')],
@@ -132,7 +141,7 @@ class VKGui:
         else:
             pass
 
-    def save(self):
+    def export_settings(self):
         options = {'title': 'Export settings as',
                    'defaultextension': '.vkdat',
                    'filetypes': [('VK data files', '.vkdat')],
@@ -149,7 +158,7 @@ class VKGui:
         else:
             pass
 
-    def imports(self):
+    def import_settings(self):
         options = {'title': 'Select settings file to import',
                    'defaultextension': '.vkdat',
                    'filetypes': [('VK data files', '.vkdat')],
@@ -171,7 +180,7 @@ class VKGui:
         else:
             pass
 
-    def info(self):
+    def show_info(self):
         messagebox.showinfo("Voight-Kampff v1.0",
                             "Developed by Aaron M "
                             "Willette\ngithub.com/pixelwhore/Voight-Kampff\ncontact@pixelwhore.com"
@@ -200,8 +209,11 @@ class VKGui:
             messagebox.showwarning("Infection complete!",
                                    "The SRC file has been modified, run at your own risk!")
         else:
-            pass
+            messagebox.showwarning("Error",
+                                   "Please select a file to modify")
 
+    def startGUI(self):
+        self.master.mainloop()
 
 
 class VKControl:
@@ -226,9 +238,5 @@ class VKControl:
         update_text = "{0: >5.2f}".format(float(new_value))
         self.value.configure(text=update_text)
 
-
-
 if __name__ == "__main__":
-    root = tk.Tk()
-    main_gui = VKGui(root)
-    root.mainloop()
+    VKGui().startGUI()
