@@ -109,7 +109,6 @@ class Virus:
 
 
 class Jitter(Virus):
-    #todo make sure that skip values don't kick it past
     def __init__(self, percentage=None, velocity=None, acceleration=None, distance=None, wait=None,
                  skip=None):
         super(Jitter, self).__init__(percentage)
@@ -171,7 +170,7 @@ class Decay(Virus):
         else:
             return False, None
 
-### MAIN FUNCTION ###
+# MAIN FUNCTION
 if __name__ == "__main__":
 
     import os
