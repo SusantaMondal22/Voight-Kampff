@@ -5,12 +5,13 @@ class Infection:
     def modify_src(self):
         self.output_file.write('DEF ' + self.output_dir.split("\\")[-1].split(".")[0] + '() \n')
         #todo write warning as a KSS message (see 'KSS_82_messages_en.pdf') instead of a line in the file...
-        self.output_file.write('This file has been infected... run at your own risk!!\n')
+        self.output_file.write(';This file has been infected... run at your own risk!!\n')
 
         while self.i < len(self.input_file):
             if self.debug: print(str(self.i) + " ", end="")
             current = self.input_file[self.i].split()
             if current:
+                if self.debug: print("Line in code: " + str(self.i + 1))
                 #todo parse E1 value from file (if want to do the wiggles)...
                 if current[0][:7] == "$VEL.CP" and self.default_velocity is None:
                     if self.debug: print("Getting exiting baseline velocity")
@@ -19,26 +20,33 @@ class Infection:
                     self.i += 1
                 elif current[0][:7] == "$ACC.CP" and self.default_acceleration is None:
                     if self.debug: print("Getting existing baseline acceleration")
-                    self.default_acceleration = current[0][8:]
+                    self.default_acceleration = current[2]
                     self.output_file.write(self.input_file[self.i])
                     self.i += 1
-                elif current[0][1:] == "PATH":
-                    if self.debug: print("Checking if in path - TRUE")
-                    self.path = True
-                    self.output_file.write(self.input_file[self.i])
-                    self.i += 1
-                elif current[0][1:5] == "LEAD":
-                    if self.debug: print("Checking if in path - FALSE")
-                    self.path = False
-                    self.output_file.write(self.input_file[self.i])
-                    self.i += 1
+                elif current[0][5:] == "Path":
+                    if current[2] == "Toolpath":
+                        if self.debug: print("Checking if in path - TRUE")
+                        self.path = True
+                        self.output_file.write(self.input_file[self.i])
+                        self.i += 1
+                    elif (current[2] == "LeadIn") or (current[2] == "Traverse") or (current[2] == "LeadOut"):
+                        if self.debug: print("Checking if in path - FALSE")
+                        self.path = False
+                        self.output_file.write(self.input_file[self.i])
+                        self.i += 1
+                    else:
+                        if self.debug: print("Atypical Path type - won't chang self.path")
+                        self.output_file.write(self.input_file[self.i])
+                        self.i += 1
+
                 elif current[0] == "LIN":
                     #todo better way to handle the order in which viruses are called???
                     if self.path:
                         try:
-                            max_skip = self.input_file[self.i:].index(";LEAD-OUT\n") - 2
+                            max_skip = self.input_file[self.i:].index(";####Path 0 LeadOut\n") - 1
                         except:
                             max_skip = 0
+                            if self.debug: print("Failure to find program length")
 
                         a, b = self.jitters.infect(self.output_file, self.input_file[self.i], self.default_acceleration,
                                                    self.default_velocity)
@@ -63,7 +71,7 @@ class Infection:
                                     self.output_file.write(self.input_file[self.i])
                                     self.i += 1
                     else:
-                        if self.debug: print("No infections on lead-in/lead-out")
+                        if self.debug: print("No infections on lead-in/lead-out/traverse")
                         self.output_file.write(self.input_file[self.i])
                         self.i += 1
                 else:
@@ -121,7 +129,7 @@ class Jitter(Virus):
     def infect(self, out_file, in_line, in_accel, in_velo):
         if self._check():
             out_file.write(';*****INFECTED WITH THE JITTERS!*****\n')
-            out_file.write('EXTRUDE = FALSE\n')  # turn off extruder
+            out_file.write(';EXTRUDE = FALSE\n')  # turn off extruder
             out_file.write('$IPO_MODE = #TCP\n')  # set to tool coordinates
             out_file.write(''.join(['$VEL.CP = ', str(self.velocity), '\n']))  # set new velocity
             out_file.write(''.join(['$ACC.CP = ', str(self.acceleration), '\n']))  # set new acceleration
@@ -136,7 +144,7 @@ class Jitter(Virus):
             out_file.write('$IPO_MODE = #BASE\n')  # reset to base coordinates
             out_file.write(''.join(['$VEL.CP = ', str(in_velo), '\n']))  # reset default velocity
             out_file.write(in_line)  # continue to proper position
-            out_file.write('EXTRUDE = TRUE\n')  # turn on extruder
+            out_file.write(';EXTRUDE = TRUE\n')  # turn on extruder
             out_file.write(';****CURED OF THE JITTERS!***\n')
             return True, self.skip
         else:
@@ -193,6 +201,6 @@ if __name__ == "__main__":
 
     if file_dir:
         my_test = Infection(file_dir)
-        #my_test.debug = True
+        my_test.debug = True
         my_test.modify_src()
         print("Infection complete")
