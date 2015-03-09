@@ -29,13 +29,9 @@ class Infection:
                         self.path = True
                         self.output_file.write(self.input_file[self.i])
                         self.i += 1
-                    elif (current[2] == "LeadIn") or (current[2] == "Traverse") or (current[2] == "LeadOut"):
+                    elif (current[2] == "LeadIn") or (current[2] == "LeadOut") or (current[2] == "Traverse"):
                         if self.debug: print("Checking if in path - FALSE")
                         self.path = False
-                        self.output_file.write(self.input_file[self.i])
-                        self.i += 1
-                    else:
-                        if self.debug: print("Atypical Path type - won't chang self.path")
                         self.output_file.write(self.input_file[self.i])
                         self.i += 1
 
